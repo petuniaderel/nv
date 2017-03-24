@@ -10,7 +10,7 @@ libnvidia-ml.so: nvml.h nvml.c
 	strip libnvidia-ml.so
 
 clean:
-	rm  libnvidia-ml.so
+	rm  libnvidia-ml.so nv.tar.gz
 
 install: all
 	rm -rf /usr/lib64/libnvidia-ml.so.1
@@ -18,5 +18,11 @@ install: all
 
 uninstall: 
 	rm -rf /usr/lib64/libnvidia-ml.so.1
-	#ln -s /usr/lib64/libnvidia-ml.so.346.46 /usr/lib64/libnvidia-ml.so.1
-	ln -s /usr/lib64/libnvidia-ml.so.352.39 /usr/lib64/libnvidia-ml.so.1
+	ln -s /usr/lib64/libnvidia-ml.so.346.46 /usr/lib64/libnvidia-ml.so.1
+	#ln -s /usr/lib64/libnvidia-ml.so.352.39 /usr/lib64/libnvidia-ml.so.1
+
+tar: nvml.h nvml.c Makefile
+	mkdir nv
+	cp nvml.c nvml.h Makefile nv
+	tar czvf nv.tar.gz nv
+	rm -rf nv

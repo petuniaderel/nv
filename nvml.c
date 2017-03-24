@@ -6,9 +6,9 @@ void * dlhandler;
 
 void __attribute__ ((constructor)) some_name_load(void)
 {
-	//dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_LAZY);
+	dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_LAZY);
 	
-	dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.352.39",RTLD_NOW);
+	//dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.352.39",RTLD_NOW);
 	if(dlhandler ==NULL)
 	{
 		printf("Error in ldopen!\n");
