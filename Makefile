@@ -1,6 +1,6 @@
 INSTALL=/lib
 
-CFLAGS+= 
+CFLAGS+= -Wall
 LDFLAGS+= -lc -ldl 
 
 all: libnvidia-ml.so

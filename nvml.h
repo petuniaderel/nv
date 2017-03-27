@@ -44,7 +44,7 @@ tool. NVML is thread-safe so it is safe to make simultaneous NVML calls from mul
 API Documentation
 
 Supported platforms:
-- Windows:     Windows Server 2008 R2 64bit, Windows Server 2012 R2 64bit, Windows 7 64bit, Windows 8 64bit, Windows 10 64bit
+- Windows:     Windows Server 2008 R2 64bit, Windows Server 2012 R2 64bit, Windows 7 64bit, Windows 8 64bit
 - Linux:       32-bit and 64-bit
 - Hypervisors: Windows Server 2008R2/2012 Hyper-V 64bit, Citrix XenServer 6.2 SP1+, VMware ESX 5.1/5.5
 
@@ -209,23 +209,6 @@ typedef enum nvmlBridgeChipType_enum
     NVML_BRIDGE_CHIP_PLX = 0,
     NVML_BRIDGE_CHIP_BRO4 = 1           
 }nvmlBridgeChipType_t;
-
-/**
- * Represents level relationships within a system between two GPUs
- * The enums are spaced to allow for future relationships
- */
-typedef enum nvmlGpuLevel_enum
-{
-    NVML_TOPOLOGY_INTERNAL           = 0, // e.g. Tesla K80
-    NVML_TOPOLOGY_SINGLE             = 10, // all devices that only need traverse a single PCIe switch
-    NVML_TOPOLOGY_MULTIPLE           = 20, // all devices that need not traverse a host bridge
-    NVML_TOPOLOGY_HOSTBRIDGE         = 30, // all devices that are connected to the same host bridge
-    NVML_TOPOLOGY_CPU                = 40, // all devices that are connected to the same CPU but possibly multiple host bridges
-    NVML_TOPOLOGY_SYSTEM             = 50  // all devices in the system
-
-    // there is purposefully no COUNT here because of the need for spacing above
-} nvmlGpuTopologyLevel_t;
-
 
 /**
  * Maximum limit on Physical Bridges per Board
@@ -408,7 +391,6 @@ typedef enum nvmlComputeMode_enum
 {
     NVML_COMPUTEMODE_DEFAULT           = 0,  //!< Default compute mode -- multiple contexts per device
     NVML_COMPUTEMODE_EXCLUSIVE_THREAD  = 1,  //!< Compute-exclusive-thread mode -- only one context per device, usable from one thread at a time
-                                             //!< This mode has been deprecated and will be removed in future releases.
     NVML_COMPUTEMODE_PROHIBITED        = 2,  //!< Compute-prohibited mode -- no contexts per device
     NVML_COMPUTEMODE_EXCLUSIVE_PROCESS = 3,  //!< Compute-exclusive-process mode -- only one context per device, usable from multiple threads at a time
     
@@ -903,14 +885,9 @@ typedef struct nvmlAccountingStats_st {
                                                 //! Set to NVML_VALUE_NOT_AVAILABLE if nvmlProcessInfo_t->usedGpuMemory is not supported
     
 
-    unsigned long long time;                    //!< Amount of time in ms during which the compute context was active. The time is reported as 0 if 
-                                                //!< the process is not terminated
+    unsigned long long time;                    //!< Amount of time in ms during which the compute context was active
     
-    unsigned long long startTime;               //!< CPU Timestamp in usec representing start time for the process
-    
-    unsigned int isRunning;                     //!< Flag to represent if the process is running (1 for running, 0 for terminated)
-
-    unsigned int reserved[5];                   //!< Reserved for future use
+    unsigned int reserved[8];
 } nvmlAccountingStats_t;
 
 /** @} */
@@ -1610,62 +1587,6 @@ nvmlReturn_t DECLDIR nvmlDeviceSetCpuAffinity(nvmlDevice_t device);
 nvmlReturn_t DECLDIR nvmlDeviceClearCpuAffinity(nvmlDevice_t device);
 
 /**
- * Retrieve the common ancestor for two devices
- * For all products.
- * Supported on Linux only.
- *
- * @param device1                              The identifier of the first device
- * @param device2                              The identifier of the second device
- * @param pathInfo                             A \ref nvmlGpuTopologyLevel_t that gives the path type
- *
- * @return
- *         - \ref NVML_SUCCESS                 if \a pathInfo has been set
- *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a device1, or \a device2 is invalid, or \a pathInfo is NULL
- *         - \ref NVML_ERROR_NOT_SUPPORTED     if the device or OS does not support this feature
- *         - \ref NVML_ERROR_UNKNOWN           an error has occurred in underlying topology discovery
- */
-nvmlReturn_t DECLDIR nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t *pathInfo);
-
-/**
- * Retrieve the set of GPUs that are nearest to a given device at a specific interconnectivity level
- * For all products.
- * Supported on Linux only.
- *
- * @param device                               The identifier of the first device
- * @param level                                The \ref nvmlGpuTopologyLevel_t level to search for other GPUs
- * @param count                                When zero, is set to the number of matching GPUs such that \a deviceArray 
- *                                             can be malloc'd.  When non-zero, \a deviceArray will be filled with \a count
- *                                             number of device handles.
- * @param deviceArray                          An array of device handles for GPUs found at \a level
- *
- * @return
- *         - \ref NVML_SUCCESS                 if \a deviceArray or \a count (if initially zero) has been set
- *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a device, \a level, or \a count is invalid, or \a deviceArray is NULL with a non-zero \a count
- *         - \ref NVML_ERROR_NOT_SUPPORTED     if the device or OS does not support this feature
- *         - \ref NVML_ERROR_UNKNOWN           an error has occurred in underlying topology discovery
- */
-nvmlReturn_t DECLDIR nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int *count, nvmlDevice_t *deviceArray);
-
-/**
- * Retrieve the set of GPUs that have a CPU affinity with the given CPU number
- * For all products.
- * Supported on Linux only.
- *
- * @param cpuNumber                            The CPU number
- * @param count                                When zero, is set to the number of matching GPUs such that \a deviceArray 
- *                                             can be malloc'd.  When non-zero, \a deviceArray will be filled with \a count
- *                                             number of device handles.
- * @param deviceArray                          An array of device handles for GPUs found with affinity to \a cpuNumber
- *
- * @return
- *         - \ref NVML_SUCCESS                 if \a deviceArray or \a count (if initially zero) has been set
- *         - \ref NVML_ERROR_INVALID_ARGUMENT  if \a cpuNumber, or \a count is invalid, or \a deviceArray is NULL with a non-zero \a count
- *         - \ref NVML_ERROR_NOT_SUPPORTED     if the device or OS does not support this feature
- *         - \ref NVML_ERROR_UNKNOWN           an error has occurred in underlying topology discovery
- */
-nvmlReturn_t DECLDIR nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int *count, nvmlDevice_t *deviceArray);
-
-/**
  * Retrieves the globally unique immutable UUID associated with this device, as a 5 part hexadecimal string,
  * that augments the immutable, board serial identifier.
  *
@@ -1984,8 +1905,6 @@ nvmlReturn_t DECLDIR nvmlDeviceGetCurrPcieLinkWidth(nvmlDevice_t device, unsigne
  *
  * For Maxwell &tm; or newer fully supported devices.
  *
- * This method is not supported on virtualized GPU environments.
- *
  * @param device                               The identifier of the target device
  * @param counter                              The specific counter that should be queried \ref nvmlPcieUtilCounter_t
  * @param value                                Reference in which to return throughput in KB/s
@@ -2213,7 +2132,6 @@ nvmlReturn_t DECLDIR nvmlDeviceGetAutoBoostedClocksEnabled(nvmlDevice_t device, 
  * rates are desired.
  * Non-root users may use this API by default but can be restricted by root from using this API by calling
  * \ref nvmlDeviceSetAPIRestriction with apiType=NVML_RESTRICTED_API_SET_AUTO_BOOSTED_CLOCKS.
- * Note: Persistence Mode is required to modify current Auto boost settings, therefore, it must be enabled.
  *
  * @param device                               The identifier of the target device
  * @param enabled                              What state to try to set auto boosted clocks of the target device to
@@ -2370,8 +2288,6 @@ nvmlReturn_t DECLDIR nvmlDeviceGetCurrentClocksThrottleReasons(nvmlDevice_t devi
  * \ref nvmlDeviceGetCurrentClocksThrottleReasons
  *
  * For all fully supported products.
- *
- * This method is not supported on virtualized GPU environments.
  *
  * @param device                               The identifier of the target device
  * @param supportedClocksThrottleReasons       Reference in which to return bitmask of supported
@@ -3042,9 +2958,7 @@ nvmlReturn_t DECLDIR nvmlDeviceGetAPIRestriction(nvmlDevice_t device, nvmlRestri
 /**
  * Gets recent samples for the GPU.
  * 
- * For Kepler &tm; or newer fully supported devices.
- * Power Samples are not supported on Maxwell based GPUs.
- * 
+ * For all fully supported products.
  * 
  * Based on type, this method can be used to fetch the power, utilization or clock samples maintained in the buffer by 
  * the driver.
@@ -3168,8 +3082,6 @@ nvmlReturn_t DECLDIR nvmlDeviceGetAccountingMode(nvmlDevice_t device, nvmlEnable
  * 
  * Accounting stats capture GPU utilization and other statistics across the lifetime of a process.
  * Accounting stats can be queried during life time of the process and after its termination.
- * The time field in \ref nvmlAccountingStats_t is reported as 0 during the lifetime of the process and 
- * updated to actual running time after its termination.
  * Accounting stats are kept in a circular buffer, newly created processes overwrite information about old
  * processes.
  *
@@ -3200,8 +3112,7 @@ nvmlReturn_t DECLDIR nvmlDeviceGetAccountingMode(nvmlDevice_t device, nvmlEnable
 nvmlReturn_t DECLDIR nvmlDeviceGetAccountingStats(nvmlDevice_t device, unsigned int pid, nvmlAccountingStats_t *stats);
 
 /**
- * Queries list of processes that can be queried for accounting stats. The list of processes returned 
- * can be in running or terminated state.
+ * Queries list of processes that can be queried for accounting stats.
  *
  * For Kepler &tm; or newer fully supported devices.
  *

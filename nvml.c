@@ -2,17 +2,21 @@
 #include "nvml.h"
 #include <stdlib.h>
 
+
+
 void * dlhandler;
 
 void __attribute__ ((constructor)) some_name_load(void)
 {
-	dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_LAZY);
+	//dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_LAZY);
+	dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_NOW);
 	
 	//dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.352.39",RTLD_NOW);
 	if(dlhandler ==NULL)
 	{
 		printf("Error in ldopen!\n");
 	}
+	//nvmlInternalGetExportTable = dlsym(dlhandler,"nvmlInternalGetExportTable");
 	//printf("DEBUG:dlhandler  is %p\n",dlhandler);
 
 		
@@ -36,13 +40,33 @@ void * getfn(const char *symbol)
 	{
 		printf("Not fount %s",symbol);
 	}
-	//printf("DEBUG:%s address  is %p\n",symbol,dlhandler);
+	//printf("DEBUG:%s address  is %p\n",symbol,ret);
 	return ret;
 	
 }
 
 
-nvmlReturn_t DECLDIR nvmlInit(void){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(void);fn = getfn("nvmlInit");ret = fn();return ret;}
+int nvmlInternalGetExportTable(int * a,unsigned char * b)
+{
+	void * ret;
+	int  (*fn)(int * a, unsigned char * b);
+	fn = getfn("nvmlInternalGetExportTable");
+	//printf("DEBUG: nvmlInternalGetExport address is %p\n",fn);
+	return fn(a,b);
+}
+
+
+
+nvmlReturn_t DECLDIR nvmlInit(void)
+{
+	nvmlReturn_t ret;
+	nvmlReturn_t DECLDIR (*fn)(void);
+	//printf("Begin init\n");
+	fn = getfn("nvmlInit_v2");
+	//printf("start init with address %p\n",fn);
+	ret = fn();
+	return ret;
+}
 nvmlReturn_t DECLDIR nvmlShutdown(void){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(void);fn = getfn("nvmlShutdown");ret = fn();return ret;}
 const DECLDIR char* nvmlErrorString(nvmlReturn_t result){const DECLDIR char * ret;const DECLDIR char* (*fn)(nvmlReturn_t result);fn = getfn("nvmlErrorString");ret = fn(result);return ret;}
 nvmlReturn_t DECLDIR nvmlSystemGetDriverVersion(char *version, unsigned int length){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(char *version, unsigned int length);fn = getfn("nvmlSystemGetDriverVersion");ret = fn(version,  length);return ret;}
@@ -57,11 +81,11 @@ nvmlReturn_t DECLDIR nvmlUnitGetTemperature(nvmlUnit_t unit, unsigned int type, 
 nvmlReturn_t DECLDIR nvmlUnitGetFanSpeedInfo(nvmlUnit_t unit, nvmlUnitFanSpeeds_t *fanSpeeds){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlUnit_t unit, nvmlUnitFanSpeeds_t *fanSpeeds);fn = getfn("nvmlUnitGetFanSpeedInfo");ret = fn(unit, fanSpeeds);return ret;}
 nvmlReturn_t DECLDIR nvmlUnitGetDevices(nvmlUnit_t unit, unsigned int *deviceCount, nvmlDevice_t *devices){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlUnit_t unit, unsigned int *deviceCount, nvmlDevice_t *devices);fn = getfn("nvmlUnitGetDevices");ret = fn(unit, deviceCount, devices);return ret;}
 nvmlReturn_t DECLDIR nvmlSystemGetHicVersion(unsigned int *hwbcCount, nvmlHwbcEntry_t *hwbcEntries){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(unsigned int *hwbcCount, nvmlHwbcEntry_t *hwbcEntries);fn = getfn("nvmlSystemGetHicVersion");ret = fn(hwbcCount, hwbcEntries);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetCount(unsigned int *deviceCount){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(unsigned int *deviceCount);fn = getfn("nvmlDeviceGetCount");ret = fn(deviceCount);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetHandleByIndex(unsigned int index, nvmlDevice_t *device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(unsigned int index, nvmlDevice_t *device);fn = getfn("nvmlDeviceGetHandleByIndex");ret = fn(index, device);return ret;}
+nvmlReturn_t DECLDIR nvmlDeviceGetCount(unsigned int *deviceCount){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(unsigned int *deviceCount);fn = getfn("nvmlDeviceGetCount_v2");ret = fn(deviceCount);return ret;}
+nvmlReturn_t DECLDIR nvmlDeviceGetHandleByIndex(unsigned int index, nvmlDevice_t *device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(unsigned int index, nvmlDevice_t *device);fn = getfn("nvmlDeviceGetHandleByIndex_v2");ret = fn(index, device);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetHandleBySerial(const char *serial, nvmlDevice_t *device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(const char *serial, nvmlDevice_t *device);fn = getfn("nvmlDeviceGetHandleBySerial");ret = fn(serial, device);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetHandleByUUID(const char *uuid, nvmlDevice_t *device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(const char *uuid, nvmlDevice_t *device);fn = getfn("nvmlDeviceGetHandleByUUID");ret = fn(uuid, device);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetHandleByPciBusId(const char *pciBusId, nvmlDevice_t *device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(const char *pciBusId, nvmlDevice_t *device);fn = getfn("nvmlDeviceGetHandleByPciBusId");ret = fn(pciBusId, device);return ret;}
+nvmlReturn_t DECLDIR nvmlDeviceGetHandleByPciBusId(const char *pciBusId, nvmlDevice_t *device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(const char *pciBusId, nvmlDevice_t *device);fn = getfn("nvmlDeviceGetHandleByPciBusId_v2");ret = fn(pciBusId, device);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, char *name, unsigned int length);fn = getfn("nvmlDeviceGetName");ret = fn(device, name, length);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t *type){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlBrandType_t *type);fn = getfn("nvmlDeviceGetBrand");ret = fn(device, type);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetIndex(nvmlDevice_t device, unsigned int *index){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *index);fn = getfn("nvmlDeviceGetIndex");ret = fn(device, index);return ret;}
@@ -69,8 +93,8 @@ nvmlReturn_t DECLDIR nvmlDeviceGetSerial(nvmlDevice_t device, char *serial, unsi
 nvmlReturn_t DECLDIR nvmlDeviceGetCpuAffinity(nvmlDevice_t device, unsigned int cpuSetSize, unsigned long *cpuSet){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int cpuSetSize, unsigned long *cpuSet);fn = getfn("nvmlDeviceGetCpuAffinity");ret = fn(device, cpuSetSize, cpuSet);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceSetCpuAffinity(nvmlDevice_t device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device);fn = getfn("nvmlDeviceSetCpuAffinity");ret = fn(device);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceClearCpuAffinity(nvmlDevice_t device){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device);fn = getfn("nvmlDeviceClearCpuAffinity");ret = fn(device);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t *pathInfo){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t *pathInfo);fn = getfn("nvmlDeviceGetTopologyCommonAncestor");ret = fn(device1, device2, pathInfo);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int *count, nvmlDevice_t *deviceArray){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int *count, nvmlDevice_t *deviceArray);fn = getfn("nvmlDeviceGetTopologyNearestGpus");ret = fn(device, level, count, deviceArray);return ret;}
+//nvmlReturn_t DECLDIR nvmlDeviceGetTopologyCommonAncestor(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t *pathInfo){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device1, nvmlDevice_t device2, nvmlGpuTopologyLevel_t *pathInfo);fn = getfn("nvmlDeviceGetTopologyCommonAncestor");ret = fn(device1, device2, pathInfo);return ret;}
+//nvmlReturn_t DECLDIR nvmlDeviceGetTopologyNearestGpus(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int *count, nvmlDevice_t *deviceArray){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlGpuTopologyLevel_t level, unsigned int *count, nvmlDevice_t *deviceArray);fn = getfn("nvmlDeviceGetTopologyNearestGpus");ret = fn(device, level, count, deviceArray);return ret;}
 nvmlReturn_t DECLDIR nvmlSystemGetTopologyGpuSet(unsigned int cpuNumber, unsigned int *count, nvmlDevice_t *deviceArray){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(unsigned int cpuNumber, unsigned int *count, nvmlDevice_t *deviceArray);fn = getfn("nvmlSystemGetTopologyGpuSet");ret = fn(cpuNumber, count, deviceArray);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetUUID(nvmlDevice_t device, char *uuid, unsigned int length){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, char *uuid, unsigned int length);fn = getfn("nvmlDeviceGetUUID");ret = fn(device, uuid, length);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetMinorNumber(nvmlDevice_t device, unsigned int *minorNumber){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *minorNumber);fn = getfn("nvmlDeviceGetMinorNumber");ret = fn(device, minorNumber);return ret;}
@@ -81,7 +105,7 @@ nvmlReturn_t DECLDIR nvmlDeviceValidateInforom(nvmlDevice_t device){nvmlReturn_t
 nvmlReturn_t DECLDIR nvmlDeviceGetDisplayMode(nvmlDevice_t device, nvmlEnableState_t *display){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlEnableState_t *display);fn = getfn("nvmlDeviceGetDisplayMode");ret = fn(device, display);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetDisplayActive(nvmlDevice_t device, nvmlEnableState_t *isActive){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlEnableState_t *isActive);fn = getfn("nvmlDeviceGetDisplayActive");ret = fn(device, isActive);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetPersistenceMode(nvmlDevice_t device, nvmlEnableState_t *mode){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlEnableState_t *mode);fn = getfn("nvmlDeviceGetPersistenceMode");ret = fn(device, mode);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetPciInfo(nvmlDevice_t device, nvmlPciInfo_t *pci){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlPciInfo_t *pci);fn = getfn("nvmlDeviceGetPciInfo");ret = fn(device, pci);return ret;}
+nvmlReturn_t DECLDIR nvmlDeviceGetPciInfo(nvmlDevice_t device, nvmlPciInfo_t *pci){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlPciInfo_t *pci);fn = getfn("nvmlDeviceGetPciInfo_v2");ret = fn(device, pci);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetMaxPcieLinkGeneration(nvmlDevice_t device, unsigned int *maxLinkGen){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *maxLinkGen);fn = getfn("nvmlDeviceGetMaxPcieLinkGeneration");ret = fn(device, maxLinkGen);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetMaxPcieLinkWidth(nvmlDevice_t device, unsigned int *maxLinkWidth){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *maxLinkWidth);fn = getfn("nvmlDeviceGetMaxPcieLinkWidth");ret = fn(device, maxLinkWidth);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetCurrPcieLinkGeneration(nvmlDevice_t device, unsigned int *currLinkGen){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *currLinkGen);fn = getfn("nvmlDeviceGetCurrPcieLinkGeneration");ret = fn(device, currLinkGen);return ret;}
