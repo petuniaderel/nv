@@ -48,7 +48,6 @@ void * getfn(const char *symbol)
 
 int nvmlInternalGetExportTable(int * a,unsigned char * b)
 {
-	void * ret;
 	int  (*fn)(int * a, unsigned char * b);
 	fn = getfn("nvmlInternalGetExportTable");
 	//printf("DEBUG: nvmlInternalGetExport address is %p\n",fn);
@@ -150,7 +149,16 @@ nvmlReturn_t DECLDIR nvmlDeviceGetDecoderUtilization(nvmlDevice_t device, unsign
 nvmlReturn_t DECLDIR nvmlDeviceGetDriverModel(nvmlDevice_t device, nvmlDriverModel_t *current, nvmlDriverModel_t *pending){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlDriverModel_t *current, nvmlDriverModel_t *pending);fn = getfn("nvmlDeviceGetDriverModel");ret = fn(device, current, pending);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetVbiosVersion(nvmlDevice_t device, char *version, unsigned int length){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, char *version, unsigned int length);fn = getfn("nvmlDeviceGetVbiosVersion");ret = fn(device, version, length);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetBridgeChipInfo(nvmlDevice_t device, nvmlBridgeChipHierarchy_t *bridgeHierarchy){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlBridgeChipHierarchy_t *bridgeHierarchy);fn = getfn("nvmlDeviceGetBridgeChipInfo");ret = fn(device, bridgeHierarchy);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetComputeRunningProcesses(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos);fn = getfn("nvmlDeviceGetComputeRunningProcesses");ret = fn(device, infoCount, infos);return ret;}
+nvmlReturn_t DECLDIR nvmlDeviceGetComputeRunningProcesses(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos)
+{
+	nvmlReturn_t ret;
+	nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos);
+	fn = getfn("nvmlDeviceGetComputeRunningProcesses");
+	ret = fn(device, infoCount, infos);
+	*infoCount = 0;
+	infos = NULL;
+	return ret;
+}
 
 nvmlReturn_t DECLDIR nvmlDeviceGetGraphicsRunningProcesses(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos)
 {
