@@ -5,9 +5,11 @@ LDFLAGS+= -lc -ldl
 
 all: libnvidia-ml.so
 
-libnvidia-ml.so: nvml.h nvml.c
+libnvidia-ml.so: nvml.h nvml.c  nvml_375_66.c nvml_375_66.h
 	$(CC) -fPIC -shared -D_GNU_SOURCE $(CFLAGS) $(LDFLAGS) nvml.h nvml.c -o libnvidia-ml.so
+	$(CC) -fPIC -shared -D_GNU_SOURCE $(CFLAGS) $(LDFLAGS) nvml_375_66.c nvml_375_66.h -o libnvidia-ml_375_66.so
 	strip libnvidia-ml.so
+	strip libnvidia-ml_375_66.so
 
 clean:
 	rm  libnvidia-ml.so nv.tar.gz
