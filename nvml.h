@@ -3767,5 +3767,5 @@ nvmlReturn_t DECLDIR nvmlEventSetFree(nvmlEventSet_t set);
 #ifdef __cplusplus
 }
 #endif
-#include "../hidden.h"
+#include "hidden.h"
 #endif

